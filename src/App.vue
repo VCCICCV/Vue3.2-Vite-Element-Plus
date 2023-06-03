@@ -1,30 +1,72 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import {ref} from "vue"
+// 数据
+let input = ref("")
+const tableData = ref([
+  {
+    date: '2016-05-03',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+  {
+    date: '2016-05-02',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+  {
+    date: '2016-05-04',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+  {
+    date: '2016-05-01',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+])
+// 方法
+const handleRowClick = () => {
+  console.log('click')
+}
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="table-box">
+    <div class="title">
+      <h3>Go实现CRUD</h3>
+    </div>
+    <!-- query -->
+    <div class="query-box">
+      <el-input v-model="input" placeholder="请输入" />
+      <el-button type="primary">Primary</el-button>
+    </div>
+    <!-- table -->
+    <el-table :data="tableData" style="width: 100%">
+    <el-table-column fixed prop="date" label="Date" width="150" />
+    <el-table-column prop="name" label="Name" width="120" />
+    <el-table-column prop="state" label="State" width="120" />
+    <el-table-column prop="city" label="City" width="120" />
+    <el-table-column prop="address" label="Address" width="600" />
+    <el-table-column prop="zip" label="Zip" width="120" />
+    <el-table-column fixed="right" label="Operations" width="120">
+      <template #default>
+        <el-button link type="primary" size="small" @click="handleRowClick"
+          >Detail</el-button
+        >
+        <el-button link type="primary" size="small">Edit</el-button>
+      </template>
+    </el-table-column>
+  </el-table>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.table-box{
+  width:800px;
+  position: absolute;
+  top:50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
 }
 </style>
