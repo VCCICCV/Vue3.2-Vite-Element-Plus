@@ -71,6 +71,7 @@ const handleSelectionChange = (val) => {
 }
 // 添加
 const handleAdd = () => {
+  dialogType = 'add'
   dialogFormVisible.value = true
   // 清空数据
   tableForm.value = {}
@@ -80,22 +81,38 @@ const handleAdd = () => {
 const dialogConfirm = () => {
   // 关闭弹窗
   dialogFormVisible.value = false
-  // 1.拿到数据
-  // 2.添加到table
-  tableData.value.push({
-    id: (tableData.value.length + 1).toString(),
-    ...tableForm.value
-  })
-  console.log(tableData.value)
+  // 判断是新增还是编辑
+  if (dialogType === 'add') {
+    // 1.拿到数据
+    // 2.添加到table
+    tableData.value.push({
+      id: (tableData.value.length + 1).toString(),
+      ...tableForm.value
+    })
+  } else if(dialogType === 'edit'){
+    // 获取到当前这条的索引
+    let index =tableData.value.findIndex(item => item.id ===tableForm.value.id)
+    console.log(tableData[index])
+    tableData.value[index] = tableForm.value
+    console.log(index)
+    // 替换值
+  }
+
 }
 // 删除多条
 const handleDelList = () => {
   multipleSelection.value.forEach(id => {
     handleDelete({ id })
-    console.log(id)
+    // console.log(id)
   })
-
   multipleSelection.value = []
+}
+// 编辑
+const handleEdit = (row) => {
+  // console.log("123")
+  dialogType = 'edit'
+  dialogFormVisible.value = true
+  tableForm.value = {...row}
 }
 
 </script>
@@ -110,7 +127,7 @@ const handleDelList = () => {
       <el-input class="query-input" v-model="input" placeholder="请输入姓名" />
       <div class="buttonlist">
         <el-button type="primary" @click="handleAdd">增加</el-button>
-        <el-button type="danger" @click="handleDelList" v-if="multipleSelection.length>0">删除多选</el-button>
+        <el-button type="danger" @click="handleDelList" v-if="multipleSelection.length > 0">删除多选</el-button>
       </div>
 
     </div>
@@ -128,8 +145,8 @@ const handleDelList = () => {
       <el-table-column prop="address" label="地址" width="300" />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
