@@ -2,11 +2,11 @@
 import { ref } from "vue"
 
 // 数据
-let input = ref("")
+let queryInput = ref("")
 const tableData = ref([
   {
     id: "1",
-    name: 'Tom',
+    name: 'Tom1',
     email: '21111@qq.com',
     phone: '12121212121',
     status: '在线',
@@ -14,7 +14,7 @@ const tableData = ref([
   },
   {
     id: "2",
-    name: 'Tom',
+    name: 'Tom2',
     email: '21111@qq.com',
     phone: '12121212121',
     status: '在线',
@@ -22,7 +22,7 @@ const tableData = ref([
   },
   {
     id: "3",
-    name: 'Tom',
+    name: 'Tom3',
     email: '21111@qq.com',
     phone: '12121212121',
     status: '在线',
@@ -30,13 +30,14 @@ const tableData = ref([
   },
   {
     id: "4",
-    name: 'Tom',
+    name: 'Tom4',
     email: '21111@qq.com',
     phone: '12121212121',
     status: '在线',
     address: 'No. 189, Grove St, Los Angeles',
   },
 ])
+let tableDataCopy = Object.assign(tableData.value)
 let multipleSelection = ref([])
 let dialogFormVisible = ref(false)
 let tableForm = ref(
@@ -91,10 +92,8 @@ const dialogConfirm = () => {
     })
   } else if(dialogType === 'edit'){
     // 获取到当前这条的索引
-    let index =tableData.value.findIndex(item => item.id ===tableForm.value.id)
-    console.log(tableData[index])
     tableData.value[index] = tableForm.value
-    console.log(index)
+    // console.log(index)
     // 替换值
   }
 
@@ -114,7 +113,21 @@ const handleEdit = (row) => {
   dialogFormVisible.value = true
   tableForm.value = {...row}
 }
-
+// 搜索
+const handfQueryName = (val) =>{
+  // console.log(queryInput.value)
+  // console.log(val)
+  if(val.length > 0){
+    // 输入框有值
+    tableData.value = tableData.value.filter(item => item.name.toLowerCase().match(val.toLowerCase()))
+    // console.log(tableData)
+  }else{
+    //输入框没有值还是原值
+    // console.log(tableDataCopy.value)
+    tableData.value = tableDataCopy
+    console.log(tableData.value)
+  }
+}
 </script>
 
 <template>
@@ -124,7 +137,7 @@ const handleEdit = (row) => {
     </div>
     <!-- query -->
     <div class="query-box">
-      <el-input class="query-input" v-model="input" placeholder="请输入姓名" />
+      <el-input class="query-input" v-model="queryInput" placeholder="请输入姓名" @input="handfQueryName"/>
       <div class="buttonlist">
         <el-button type="primary" @click="handleAdd">增加</el-button>
         <el-button type="danger" @click="handleDelList" v-if="multipleSelection.length > 0">删除多选</el-button>
