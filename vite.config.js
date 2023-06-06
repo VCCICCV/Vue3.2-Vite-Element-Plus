@@ -3,16 +3,13 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue({
-    // 开启$ref
-    template: {
-      // 开启$ref
-      refTransform: true
-    },
-    script: {
-      reactivityTransform: true
+  plugins: [vue()],
+  server: {
+    proxy:{
+      '/user':{
+        target:"http://127.0.0.1:3004/",
+      }
     }
-  }),
-],
-base:'./',// 打包相对路径
+  },
+  base: './',// 打包相对路径
 })

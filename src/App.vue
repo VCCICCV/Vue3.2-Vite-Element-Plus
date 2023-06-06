@@ -1,6 +1,7 @@
 <script setup>
+import { async } from "q";
 import { ref } from "vue"
-
+import request from "./utils/request";
 // 数据
 let queryInput = ref("")
 const tableData = ref([
@@ -128,6 +129,16 @@ const handfQueryName = (val) =>{
     console.log(tableData.value)
   }
 }
+// request
+const getTableData = async (cur = 1) =>{
+  let res = await request.get('/list',{
+    pageSize:10,
+    pageNum:cur
+  })
+  // let res = await request.get(`/list?pageSize=10&pageNum=${cur}`)
+  console.log(res)
+}
+getTableData()
 </script>
 
 <template>
