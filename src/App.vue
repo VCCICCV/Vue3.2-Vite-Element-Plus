@@ -5,38 +5,38 @@ import request from "./utils/request";
 // 数据
 let queryInput = ref("")
 const tableData = ref([
-  {
-    id: "1",
-    name: 'Tom1',
-    email: '21111@qq.com',
-    phone: '12121212121',
-    status: '在线',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    id: "2",
-    name: 'Tom2',
-    email: '21111@qq.com',
-    phone: '12121212121',
-    status: '在线',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    id: "3",
-    name: 'Tom3',
-    email: '21111@qq.com',
-    phone: '12121212121',
-    status: '在线',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    id: "4",
-    name: 'Tom4',
-    email: '21111@qq.com',
-    phone: '12121212121',
-    status: '在线',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
+  // {
+  //   id: "1",
+  //   name: 'Tom1',
+  //   email: '21111@qq.com',
+  //   phone: '12121212121',
+  //   status: '在线',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+  // {
+  //   id: "2",
+  //   name: 'Tom2',
+  //   email: '21111@qq.com',
+  //   phone: '12121212121',
+  //   status: '在线',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+  // {
+  //   id: "3",
+  //   name: 'Tom3',
+  //   email: '21111@qq.com',
+  //   phone: '12121212121',
+  //   status: '在线',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+  // {
+  //   id: "4",
+  //   name: 'Tom4',
+  //   email: '21111@qq.com',
+  //   phone: '12121212121',
+  //   status: '在线',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
 ])
 let tableDataCopy = Object.assign(tableData.value)
 let multipleSelection = ref([])
@@ -55,7 +55,7 @@ let total = ref(10)
 let curPage = ref(1)
 // 方法
 // 删除一条
-const handleDelete = async ({ID}) => {
+const handleDelete = async ({ ID }) => {
   // console.log(row.id)
   // 通过id获取对应值
   // let index = tableData.value.findIndex(item => item.id === row.id)
@@ -101,16 +101,23 @@ const dialogConfirm = async () => {
     // })
 
     // 添加数据
-    await request.post("/add",{
+    await request.post("/add", {
       ...tableForm.value // 展开运算符
     })
     // 刷新数据
     getTableData(curPage)
   } else if (dialogType === 'edit') {
-    // 获取到当前这条的索引
-    tableData.value[index] = tableForm.value
-    // console.log(index)
-    // 替换值
+    // // 获取到当前这条的索引
+    // tableData.value[index] = tableForm.value
+    // // console.log(index)
+    // // 替换值
+
+    // 编辑
+    await request.put(`/update/${tableForm.value.ID}`, {
+      ...tableForm.value
+    })
+    console.log(tableForm.value.ID)
+    await getTableData(curPage)
   }
 
 }
@@ -131,19 +138,26 @@ const handleEdit = (row) => {
   tableForm.value = { ...row }
 }
 // 搜索
-const handfQueryName = (val) => {
-  // console.log(queryInput.value)
-  // console.log(val)
+const handfQueryName = async (val) => {
+  // // console.log(queryInput.value)
+  // // console.log(val)
+  // if (val.length > 0) {
+  //   // 输入框有值
+  //   tableData.value = tableData.value.filter(item => item.name.toLowerCase().match(val.toLowerCase()))
+  //   // console.log(tableData)
+  // } else {
+  //   //输入框没有值还是原值
+  //   // console.log(tableDataCopy.value)
+  //   tableData.value = tableDataCopy
+  //   // console.log(tableData.value)
+  // }
+
   if (val.length > 0) {
-    // 输入框有值
-    tableData.value = tableData.value.filter(item => item.name.toLowerCase().match(val.toLowerCase()))
-    // console.log(tableData)
-  } else {
-    //输入框没有值还是原值
-    // console.log(tableDataCopy.value)
-    tableData.value = tableDataCopy
-    // console.log(tableData.value)
+    tableData.value = await request.get(`/list/${val}`)
+  }else{
+    await getTableData(curPage)
   }
+
 }
 // request
 const getTableData = async (cur = 1) => {
@@ -152,7 +166,7 @@ const getTableData = async (cur = 1) => {
     pageNum: cur
   })
   // let res = await request.get(`/list?pageSize=10&pageNum=${cur}`)
-  console.log(res)
+  // console.log(res)
   tableData.value = res.list
   total = res.total
   curPage = res.pageNum
@@ -160,7 +174,7 @@ const getTableData = async (cur = 1) => {
 }
 getTableData(1)
 // 请求分页
-const handleChangePage = (val) =>{
+const handleChangePage = () => {
   getTableData(curPage)
 }
 </script>
@@ -172,7 +186,7 @@ const handleChangePage = (val) =>{
     </div>
     <!-- query -->
     <div class="query-box">
-      <el-input class="query-input" v-model="queryInput" placeholder="请输入姓名" @input="handfQueryName" />
+      <el-input class="query-input" v-model="queryInput" placeholder="请输入姓名" @change="handfQueryName" />
       <div class="buttonlist">
         <el-button type="primary" @click="handleAdd">增加</el-button>
         <el-button type="danger" @click="handleDelList" v-if="multipleSelection.length > 0">删除多选</el-button>
@@ -227,7 +241,8 @@ const handleChangePage = (val) =>{
     </el-dialog>
     <!-- 分页 -->
     <div class="example-pagination-block">
-      <el-pagination layout="prev, pager, next" :total="total" v-model:current-page="curPage" @current-change="handleChangePage"/>
+      <el-pagination layout="prev, pager, next" :total="total" v-model:current-page="curPage"
+        @current-change="handleChangePage" />
     </div>
   </div>
 </template>
@@ -254,7 +269,7 @@ const handleChangePage = (val) =>{
 
 .example-pagination-block {
   margin-top: 10px;
-  display:flex;
-  justify-content:center;
+  display: flex;
+  justify-content: center;
 }
 </style>
