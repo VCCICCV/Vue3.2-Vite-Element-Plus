@@ -51,23 +51,30 @@ let tableForm = ref(
   }
 )
 let dialogType = ref('add')
+let total = ref(10)
+let curPage = ref(1)
 // 方法
 // 删除一条
-const handleDelete = (row) => {
+const handleDelete = async ({ID}) => {
   // console.log(row.id)
   // 通过id获取对应值
-  let index = tableData.value.findIndex(item => item.id === row.id)
-  console.log(index)
-  // 通过索引值删除对应条目
-  tableData.value.splice(index, 1)
+  // let index = tableData.value.findIndex(item => item.id === row.id)
+  // console.log(index)
+  // // 通过索引值删除对应条目
+  // tableData.value.splice(index, 1)
+
+  await request.delete(`/delete/${ID}`)
+  await getTableData(curPage)
 }
+
+
 // 选择
 const handleSelectionChange = (val) => {
   // multipleSelection.value = val
   // console.log(val)
   multipleSelection.value = []
   val.forEach(item => {
-    multipleSelection.value.push(item.id)
+    multipleSelection.value.push(item.ID)
   })
   // console.log(multipleSelection.value)
 }
@@ -80,18 +87,26 @@ const handleAdd = () => {
 }
 // console.log(tableForm)
 // 添加确认
-const dialogConfirm = () => {
+const dialogConfirm = async () => {
   // 关闭弹窗
   dialogFormVisible.value = false
   // 判断是新增还是编辑
   if (dialogType === 'add') {
     // 1.拿到数据
     // 2.添加到table
-    tableData.value.push({
-      id: (tableData.value.length + 1).toString(),
-      ...tableForm.value
+
+    // tableData.value.push({
+    //   id: (tableData.value.length + 1).toString(),
+    //   ...tableForm.value
+    // })
+
+    // 添加数据
+    await request.post("/add",{
+      ...tableForm.value // 展开运算符
     })
-  } else if(dialogType === 'edit'){
+    // 刷新数据
+    getTableData(curPage)
+  } else if (dialogType === 'edit') {
     // 获取到当前这条的索引
     tableData.value[index] = tableForm.value
     // console.log(index)
@@ -101,8 +116,8 @@ const dialogConfirm = () => {
 }
 // 删除多条
 const handleDelList = () => {
-  multipleSelection.value.forEach(id => {
-    handleDelete({ id })
+  multipleSelection.value.forEach(ID => {
+    handleDelete({ ID })
     // console.log(id)
   })
   multipleSelection.value = []
@@ -112,33 +127,42 @@ const handleEdit = (row) => {
   // console.log("123")
   dialogType = 'edit'
   dialogFormVisible.value = true
-  tableForm.value = {...row}
+
+  tableForm.value = { ...row }
 }
 // 搜索
-const handfQueryName = (val) =>{
+const handfQueryName = (val) => {
   // console.log(queryInput.value)
   // console.log(val)
-  if(val.length > 0){
+  if (val.length > 0) {
     // 输入框有值
     tableData.value = tableData.value.filter(item => item.name.toLowerCase().match(val.toLowerCase()))
     // console.log(tableData)
-  }else{
+  } else {
     //输入框没有值还是原值
     // console.log(tableDataCopy.value)
     tableData.value = tableDataCopy
-    console.log(tableData.value)
+    // console.log(tableData.value)
   }
 }
 // request
-const getTableData = async (cur = 1) =>{
-  let res = await request.get('/list',{
-    pageSize:10,
-    pageNum:cur
+const getTableData = async (cur = 1) => {
+  let res = await request.get('/list', {
+    pageSize: 10,
+    pageNum: cur
   })
   // let res = await request.get(`/list?pageSize=10&pageNum=${cur}`)
   console.log(res)
+  tableData.value = res.list
+  total = res.total
+  curPage = res.pageNum
+  // console.log(total.value)
 }
-getTableData()
+getTableData(1)
+// 请求分页
+const handleChangePage = (val) =>{
+  getTableData(curPage)
+}
 </script>
 
 <template>
@@ -148,7 +172,7 @@ getTableData()
     </div>
     <!-- query -->
     <div class="query-box">
-      <el-input class="query-input" v-model="queryInput" placeholder="请输入姓名" @input="handfQueryName"/>
+      <el-input class="query-input" v-model="queryInput" placeholder="请输入姓名" @input="handfQueryName" />
       <div class="buttonlist">
         <el-button type="primary" @click="handleAdd">增加</el-button>
         <el-button type="danger" @click="handleDelList" v-if="multipleSelection.length > 0">删除多选</el-button>
@@ -201,6 +225,10 @@ getTableData()
         </span>
       </template>
     </el-dialog>
+    <!-- 分页 -->
+    <div class="example-pagination-block">
+      <el-pagination layout="prev, pager, next" :total="total" v-model:current-page="curPage" @current-change="handleChangePage"/>
+    </div>
   </div>
 </template>
 
@@ -222,5 +250,11 @@ getTableData()
 
 .query-input {
   width: 200px;
+}
+
+.example-pagination-block {
+  margin-top: 10px;
+  display:flex;
+  justify-content:center;
 }
 </style>
